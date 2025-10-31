@@ -6,26 +6,23 @@ class Room(BaseModel):
     room_name: str
     room_type: str
 
+class Course(BaseModel):
+    id: str
+    name: str
+    units: int
+    dept_id: str
+    trimester_id: str
+    academic_years_id: str
+
 class Instructor(BaseModel):
     id: str
     user_id: str
     dept_id: str
-
-class Course(BaseModel):
-    id: str
-    code: str
-    name: str
-    units: int
-    dept_id: str
-    trimester_id: Optional[str]
-    academic_years_id: str
-    has_lab: bool
-    is_assigned: bool
+    max_load: int = 12
 
 class CourseAssignment(BaseModel):
     course_id: str
     instructor_id: str
-    room_id: str
 
 class YearAndSection(BaseModel):
     year: int

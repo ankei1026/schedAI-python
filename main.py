@@ -20,23 +20,20 @@ app.add_middleware(
 def root():
     return {"message": "FastAPI is running!"}
 
-
-# --- Request model for POST body ---
 class AssignmentRequest(BaseModel):
     courses: List[Course]
     instructors: List[Instructor]
-    rooms: List[Room]
 
-# --- Endpoint ---
-@app.post("/assign-courses", response_model=List[CourseAssignment])
-def assign_courses(data: AssignmentRequest):
+@app.post("/assign-courses")
+def assign_courses(courses: List[Course], instructors: List[Instructor]):
     service = AssignmentService()
-    assignments = service.assign_courses(
-        courses=data.courses,
-        instructors=data.instructors,
-        rooms=data.rooms
-    )
-    return assignments
+    assignments = service.assign_courses(courses, instructors)
+
+    return {
+        "recommended_instructors": [
+            {"id": a.instructor_id, "course_id": a.course_id} for a in assignments
+        ]
+    }
 
 # --- Request body model ---
 class ScheduleRequest(BaseModel):
