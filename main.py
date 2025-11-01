@@ -5,6 +5,7 @@ from models.scheduling_model import Course, Instructor, Room, CourseAssignment
 from pydantic import BaseModel
 from typing import List
 
+#  python -m uvicorn main:app --reload --port 9000 run this
 app = FastAPI(title="Sched_AI")
 
 # --- Allow Laravel access ---

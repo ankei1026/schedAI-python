@@ -9,6 +9,20 @@ class AssignmentService:
         self.model = cp_model.CpModel()
 
     def assign_courses(self, courses: List[Course], instructors: List[Instructor]) -> List[CourseAssignment]:
+        # ✅ Deduplicate instructors by user_id safely
+        unique_instructors = {}
+        for inst in instructors:
+            user_key = getattr(inst, "user_id", None)
+            if user_key is None:
+                # fallback: use instructor.id if user_id is missing
+                user_key = inst.id
+            # Only keep the first instructor per user_id
+            if user_key not in unique_instructors:
+                unique_instructors[user_key] = inst
+
+        # Replace with unique list
+        instructors = list(unique_instructors.values())
+
         # ✅ Group instructors by department
         dept_instructors = {}
         for inst in instructors:
@@ -71,4 +85,3 @@ class AssignmentService:
                 if solver.BooleanValue(assign_vars[(c.id, i.id)]):
                     assignments.append(CourseAssignment(course_id=c.id, instructor_id=i.id))
         return assignments
-    
