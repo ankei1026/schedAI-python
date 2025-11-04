@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from services.assignment_service import AssignmentService
 from models.scheduling_model import Course, Instructor, Room, CourseAssignment
+from services.conflict_service import ConflictRequest, check_schedule_conflict_logic
+from models.scheduling_model import ScheduleData, ConflictRequest
 from pydantic import BaseModel
 from typing import List
 
@@ -53,3 +55,11 @@ def generate_schedule(data: ScheduleRequest):
         timeslots=data.timeslots
     )
     return {"schedule": schedule}
+
+@app.post("/check_schedule_conflict")
+def check_schedule_conflict(request: ConflictRequest):
+    """
+    Delegates conflict checking to conflict_service.py
+    """
+    result = check_schedule_conflict_logic(request)
+    return result
