@@ -33,7 +33,10 @@ class ScheduleData(BaseModel):
     academic_year_id: str
     trimester_id: str
     room_id: str
+    room_name: Optional[str] = None
     instructor_id: str
+    instructor_name: Optional[str] = None  
+    course_name: Optional[str] = None
     days: List[str]
     start_time: str
     end_time: str
