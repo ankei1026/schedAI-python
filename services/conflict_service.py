@@ -34,7 +34,7 @@ def format_suggestions_message(vacant_slots: List[Dict]) -> str:
             messages.append(f"{day}: {', '.join(slot_strings)}")
     
     if messages:
-        return "Available time slots:\n" + "\n".join(messages)
+        return "Available time slots: " + ", ".join(messages)
     return ""
 
 def get_vacant_slots(occupied_slots: List[Tuple[datetime, datetime]], day_start: datetime, day_end: datetime, lunch_start: datetime, lunch_end: datetime) -> List[Dict]:
@@ -124,7 +124,8 @@ def check_schedule_conflict_logic(request: ConflictRequest) -> dict:
         return {
             "conflict": True,
             "type": "school_hours",
-            "message": f"School Hours Violation: Classes must be scheduled between {format_time_ampm('08:00')} and {format_time_ampm('20:00')} only."
+            "message": f"School Hours Violation: Classes must be scheduled between {format_time_ampm('08:00')} and {format_time_ampm('20:00')} only.",
+            "suggestions": ""
         }
     
     # Check lunch break conflict for new schedule
@@ -133,7 +134,8 @@ def check_schedule_conflict_logic(request: ConflictRequest) -> dict:
         return {
             "conflict": True,
             "type": "lunch_break",
-            "message": "Lunch Break: Students needs to rest and eat lunch for energy (12:00 PM - 1:00 PM)."
+            "message": "Lunch Break: Students needs to rest and eat lunch for energy (12:00 PM - 1:00 PM).",
+            "suggestions": ""
         }
 
     # Group existing schedules by room and day for vacancy suggestions
@@ -216,26 +218,22 @@ def check_schedule_conflict_logic(request: ConflictRequest) -> dict:
                                 "slots": day_vacant_slots
                             })
                 
-                # Create formatted message
+                # Create SEPARATE messages
+                conflict_message = f"Room Conflict: The selected room {room_display_name} is already occupied on {conflict_days} {conflict_time}."
                 suggestions_message = format_suggestions_message(vacant_slots)
-                full_message = f"Room Conflict: The selected room {room_display_name} is already occupied on {conflict_days} {conflict_time}."
-                if suggestions_message:
-                    full_message += f"\n\n{suggestions_message}"
                 
                 return {
                     "conflict": True,
                     "type": "room",
-                    "message": full_message,
+                    "message": conflict_message,  # Main conflict message
+                    "suggestions": suggestions_message,  # Separate suggestions message
                     "conflicting_instructor_id": existing.instructor_id,
                     "conflicting_instructor_name": existing.instructor_name,
                     "conflicting_room_id": existing.room_id,
                     "conflicting_room_name": existing.room_name,
                     "days": list(overlapping_days),
                     "time": conflict_time,
-                    "suggestions": {
-                        "message": "Available time slots:",
-                        "vacant_slots": vacant_slots
-                    } if vacant_slots else None
+                    "vacant_slots": vacant_slots if vacant_slots else None
                 }
 
             # Instructor conflict
@@ -256,25 +254,25 @@ def check_schedule_conflict_logic(request: ConflictRequest) -> dict:
                                 "slots": day_vacant_slots
                             })
                 
-                # Create formatted message
+                # Create SEPARATE messages
+                conflict_message = f"Instructor Conflict: {instructor_display_name} has schedule on {conflict_days} at {conflict_time}"
                 suggestions_message = format_suggestions_message(vacant_slots)
-                full_message = f"Instructor Conflict: {instructor_display_name} has schedule on {conflict_days} at {conflict_time}"
-                if suggestions_message:
-                    full_message += f"\n\n{suggestions_message}"
                 
                 return {
                     "conflict": True,
                     "type": "instructor",
-                    "message": full_message,
+                    "message": conflict_message,  # Main conflict message
+                    "suggestions": suggestions_message,  # Separate suggestions message
                     "conflicting_instructor_id": existing.instructor_id,
                     "conflicting_instructor_name": existing.instructor_name,
                     "days": list(overlapping_days),
                     "time": conflict_time,
-                    "suggestions": {
-                        "message": "Available time slots:",
-                        "vacant_slots": vacant_slots
-                    } if vacant_slots else None
+                    "vacant_slots": vacant_slots if vacant_slots else None
                 }
 
     # No conflict found
-    return {"conflict": False, "message": "No conflicts detected."}
+    return {
+        "conflict": False, 
+        "message": "No conflicts detected.",
+        "suggestions": ""
+    }
