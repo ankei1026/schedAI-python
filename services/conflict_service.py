@@ -109,8 +109,8 @@ def check_schedule_conflict_logic(request: ConflictRequest) -> dict:
     new = request.new_schedule
     
     # Define school operating hours
-    school_start = parse_time("08:00")
-    school_end = parse_time("20:00")
+    school_start = parse_time("06:00")
+    school_end = parse_time("21:00")
     
     # Define lunch break time range
     lunch_start = parse_time("12:00")
@@ -124,7 +124,7 @@ def check_schedule_conflict_logic(request: ConflictRequest) -> dict:
         return {
             "conflict": True,
             "type": "school_hours",
-            "message": f"School Hours Violation: Classes must be scheduled between {format_time_ampm('08:00')} and {format_time_ampm('20:00')} only.",
+            "message": f"School Hours Violation: Classes must be scheduled between {format_time_ampm('06:00')} and {format_time_ampm('21:00')} only.",
             "suggestions": ""
         }
     
